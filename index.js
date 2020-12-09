@@ -7,6 +7,30 @@ const converter = require('xml-js');
 const UTF16_A = 65;
 const ALPHABET_TOTAL_CHAR_COUNT = 26;
 
+/*
+	Get column literal index by numeric index.
+	e.g.: 0 -> A, 27 -> AA, 28 -> AB ...
+*/
+const getCharIndexByNumIndex = (numIndex) => {
+	let divRes = Math.floor(numIndex / ALPHABET_TOTAL_CHAR_COUNT);
+	let divRem = Math.floor(numIndex % ALPHABET_TOTAL_CHAR_COUNT);
+	if (!divRes && !divRem) {
+		return ['A'];
+	}
+	if (divRes) {
+		// prettier-ignore
+		let char1 = divRes > ALPHABET_TOTAL_CHAR_COUNT
+			? getCharIndexByNumIndex(divRes - 1)
+			: [String.fromCharCode(UTF16_A + divRes - 1)];
+		let char2 = String.fromCharCode(UTF16_A + divRem);
+		return [...char1, char2];
+	}
+	if (!divRes && divRem) {
+		let char = String.fromCharCode(UTF16_A + divRem);
+		return [char];
+	}
+};
+
 class WorksheetWriter extends Transform {
 	constructor({ config, options }) {
 		super({ objectMode: true });
@@ -15,18 +39,9 @@ class WorksheetWriter extends Transform {
 		this.config = config;
 		this.options = options;
 	}
-	generateCellIndex(valIndex) {
-		if (valIndex === 0) {
-			return `A${this.row}`;
-		} else if (Math.floor(valIndex / ALPHABET_TOTAL_CHAR_COUNT) === 0) {
-			let char = String.fromCharCode(UTF16_A + valIndex);
-			return `${char}${this.row}`;
-		}
-		let res1 = Math.floor(valIndex / ALPHABET_TOTAL_CHAR_COUNT);
-		let res2 = Math.floor(valIndex % ALPHABET_TOTAL_CHAR_COUNT);
-		let char1 = String.fromCharCode(UTF16_A + res1 - 1);
-		let char2 = String.fromCharCode(UTF16_A + res2);
-		return `${char1}${char2}${this.row}`;
+	generateCellIndex(numIndex) {
+		let chars = getCharIndexByNumIndex(numIndex);
+		return `${chars.join('')}${this.row}`;
 	}
 	addHeader() {
 		let json = {

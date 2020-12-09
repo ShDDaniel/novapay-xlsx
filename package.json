@@ -1,7 +1,7 @@
 {
 	"name": "novapay-xlsx",
 	"description": "xlsx stream writer",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"main": "index.js",
 	"author": "shyhanskyi.d@novapay.ua",
 	"license": "ISC",
@@ -17,6 +17,10 @@
 	"dependencies": {
 		"archiver": "5.1.0",
 		"xml-js": "1.6.11"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ShDDaniel/novapay-xlsx.git"
 	},
 	"scripts": {
 		"lint": "eslint . --quiet"

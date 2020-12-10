@@ -6,9 +6,14 @@ const converter = require('xml-js');
 
 const UTF16_A = 65;
 const ALPHABET_TOTAL_CHAR_COUNT = 26;
+const CELL_TYPES = {
+	BOOL: 'b',
+	NUMBER: 'n',
+	INLINE_STR: 'inlineStr'
+};
 
 /*
-	Get column literal index by numeric index.
+	Get column literal index by numeric index,
 	e.g.: 0 -> A, 27 -> AA, 28 -> AB ...
 */
 const getCharIndexByNumIndex = (numIndex) => {
@@ -29,6 +34,14 @@ const getCharIndexByNumIndex = (numIndex) => {
 		let char = String.fromCharCode(UTF16_A + divRem);
 		return [char];
 	}
+};
+
+const isNumber = (val) => {
+	return typeof val === 'number' || parseInt(val) === 'number' || parseFloat(val) === 'number';
+};
+
+const isBool = (val) => {
+	return typeof val === 'boolean' || val === 'true' || val === 'false';
 };
 
 class WorksheetWriter extends Transform {
@@ -85,11 +98,25 @@ class WorksheetWriter extends Transform {
 				},
 				c: this.config.map((c, index) => {
 					let r = this.generateCellIndex(index);
+					let val = c.formatter ? c.formatter(row[c.key], row) : row[c.key];
+
+					if (isBool(val)) {
+						return {
+							_attributes: { r, t: CELL_TYPES.BOOL },
+							v: { _text: [true, 'true'].includes(val) ? 1 : 0 }
+						};
+					}
+					if (isNumber(val)) {
+						return {
+							_attributes: { r, t: CELL_TYPES.NUMBER },
+							v: { _text: val }
+						};
+					}
 					return {
-						_attributes: { r, t: 'inlineStr' },
+						_attributes: { r, t: CELL_TYPES.INLINE_STR },
 						is: {
 							t: {
-								_text: (c.formatter ? c.formatter(row[c.key], row) : row[c.key]) || ''
+								_text: val || ''
 							}
 						}
 					};

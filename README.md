@@ -1,2 +1,1 @@
-Current limitations:
-- all cells are of type inlineStr
+xlsx stream writer

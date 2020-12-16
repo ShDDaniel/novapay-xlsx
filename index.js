@@ -12,10 +12,11 @@ const CELL_TYPES = {
 	INLINE_STR: 'inlineStr'
 };
 
-/*
-	Get column literal index by numeric index,
-	e.g.: 0 -> A, 27 -> AA, 28 -> AB ...
-*/
+/**
+ * 	Returns a column's literal index as an array of chars,
+ *	e.g.: 0 -> [A], 27 -> [A, A], 28 -> [A, B] ...
+ * 	@param {number} numIndex Index of a config item
+ */
 const getCharIndexByNumIndex = (numIndex) => {
 	let divRes = Math.floor(numIndex / ALPHABET_TOTAL_CHAR_COUNT);
 	let divRem = Math.floor(numIndex % ALPHABET_TOTAL_CHAR_COUNT);
@@ -145,10 +146,33 @@ class WorksheetWriter extends Transform {
 	}
 }
 
+/**
+ * @param {(ReadableStream|PassThrough|TransformStream)} source
+ *
+ * @param {Object[]} config
+ * @param {string} config[].key
+ * @param {string} config[].label
+ * @param {function} config[].formatter
+ *
+ * @param {Object} [options]
+ * @param {boolean} options.debugMemUsage
+ * @param {string} options.chunkRowKey
+ */
 const xlsx = (source, config, options = {}) => {
 	if (!Array.isArray(config)) {
 		throw new Error('config should be an array of objects');
 	}
+	config.forEach((c) => {
+		if (!c || !c.key || !c.label) {
+			let err =
+				`a config item\n ${JSON.stringify(c)}\n is either missing` +
+				`'key' or 'label' properties or they have invalid values.`;
+			throw new Error(err);
+		}
+		if (c.formatter && typeof c.formatter !== 'function') {
+			throw new Error(`'formatter' in \n ${JSON.stringify(c)}\n is not a function.`);
+		}
+	});
 
 	let worksheetPipe = new WorksheetWriter({ config, options });
 	source.on('end', () => {

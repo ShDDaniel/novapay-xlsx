@@ -15,7 +15,7 @@
 		"prettier": "^2.0.5"
 	},
 	"dependencies": {
-		"archiver": "5.1.0",
+		"archiver": "5.2.0",
 		"xml-js": "1.6.11"
 	},
 	"repository": {

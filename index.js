@@ -127,15 +127,9 @@ class WorksheetWriter extends Transform {
 		this.push(Buffer.from(converter.json2xml(json, { compact: true })));
 		this.row++;
 	}
-	finalizeSheet() {
-		this.push(fs.readFileSync(path.join(__dirname, 'src/xml/finalChunk.xml')));
-	}
-	initSheet() {
-		this.push(fs.readFileSync(path.join(__dirname, 'src/xml/initChunk.xml')));
-	}
 	_transform(chunk, encoding, callback) {
 		if (this.row === 1) {
-			this.initSheet();
+			this.push(fs.readFileSync(path.join(__dirname, 'src/xml/initChunk.xml')));
 			this.addHeader();
 			this.addRow(this.options.chunkRowKey ? chunk[this.options.chunkRowKey] : chunk);
 			callback();
@@ -143,6 +137,10 @@ class WorksheetWriter extends Transform {
 			this.addRow(this.options.chunkRowKey ? chunk[this.options.chunkRowKey] : chunk);
 			callback();
 		}
+	}
+	_flush(callback) {
+		this.push(fs.readFileSync(path.join(__dirname, 'src/xml/finalChunk.xml')));
+		callback();
 	}
 }
 
@@ -175,9 +173,6 @@ const xlsx = (source, config, options = {}) => {
 	});
 
 	let worksheetPipe = new WorksheetWriter({ config, options });
-	source.on('end', () => {
-		worksheetPipe.finalizeSheet();
-	});
 
 	const archive = archiver('zip', { zlib: { level: 9 } });
 	archive.directory(path.join(__dirname, 'src/xml/_rels'), '_rels');
@@ -189,7 +184,9 @@ const xlsx = (source, config, options = {}) => {
 		{ name: '[Content_Types].xml' }
 	);
 	archive.append(source.pipe(worksheetPipe), { name: 'xl/worksheets/sheet1.xml' });
-	archive.finalize();
+	archive.finalize().catch((err) => {
+		archive.emit('error', err);
+	});
 
 	archive.on('end', () => {
 		if (options.debugMemUsage) {

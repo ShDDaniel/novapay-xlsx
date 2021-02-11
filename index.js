@@ -12,6 +12,9 @@ const CELL_TYPES = {
 	INLINE_STR: 'inlineStr'
 };
 
+const initChunk = fs.readFileSync(path.join(__dirname, 'src/xml/initChunk.xml'));
+const finalChunk = fs.readFileSync(path.join(__dirname, 'src/xml/finalChunk.xml'));
+
 /**
  * 	Returns a column's literal index as an array of chars,
  *	e.g.: 0 -> [A], 27 -> [A, A], 28 -> [A, B] ...
@@ -129,7 +132,7 @@ class WorksheetWriter extends Transform {
 	}
 	_transform(chunk, encoding, callback) {
 		if (this.row === 1) {
-			this.push(fs.readFileSync(path.join(__dirname, 'src/xml/initChunk.xml')));
+			this.push(initChunk);
 			this.addHeader();
 			this.addRow(this.options.chunkRowKey ? chunk[this.options.chunkRowKey] : chunk);
 			callback();
@@ -139,7 +142,7 @@ class WorksheetWriter extends Transform {
 		}
 	}
 	_flush(callback) {
-		this.push(fs.readFileSync(path.join(__dirname, 'src/xml/finalChunk.xml')));
+		this.push(finalChunk);
 		callback();
 	}
 }

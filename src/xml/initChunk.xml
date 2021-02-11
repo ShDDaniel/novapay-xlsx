@@ -33,7 +33,7 @@
         </sheetView>
     </sheetViews>
     <sheetFormatPr
-        defaultColWidth="11.6"
+        defaultColWidth="27"
         defaultRowHeight="12.8"
         zeroHeight="false"
         outlineLevelRow="0"

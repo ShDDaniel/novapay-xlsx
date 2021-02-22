@@ -41,7 +41,7 @@ const getCharIndexByNumIndex = (numIndex) => {
 };
 
 const isNumber = (val) => {
-	return typeof val === 'number' || parseInt(val) === 'number' || parseFloat(val) === 'number';
+	return typeof val === 'number' || typeof parseInt(val) === 'number' || typeof parseFloat(val) === 'number';
 };
 
 const isBool = (val) => {

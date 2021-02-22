@@ -40,10 +40,6 @@ const getCharIndexByNumIndex = (numIndex) => {
 	}
 };
 
-const isNumber = (val) => {
-	return typeof val === 'number' || typeof parseInt(val) === 'number' || typeof parseFloat(val) === 'number';
-};
-
 const isBool = (val) => {
 	return typeof val === 'boolean' || val === 'true' || val === 'false';
 };
@@ -110,7 +106,7 @@ class WorksheetWriter extends Transform {
 							v: { _text: [true, 'true'].includes(val) ? 1 : 0 }
 						};
 					}
-					if (isNumber(val)) {
+					if (typeof val === 'number') {
 						return {
 							_attributes: { r, t: CELL_TYPES.NUMBER },
 							v: { _text: val }

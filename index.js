@@ -1,3 +1,6 @@
+/**	Reference:
+ *  http://officeopenxml.com/anatomyofOOXML-xlsx.php
+ */
 const fs = require('fs');
 const path = require('path');
 const { Transform } = require('stream');
@@ -10,6 +13,14 @@ const CELL_TYPES = {
 	BOOL: 'b',
 	NUMBER: 'n',
 	INLINE_STR: 'inlineStr'
+};
+const CELL_STYLES = {
+	DEFAULT: 0,
+	CURRENCY: 1
+};
+const CELL_VARIANTS = {
+	CURRENCY: 'currency',
+	NUMBER: 'number'
 };
 
 const initChunk = fs.readFileSync(path.join(__dirname, 'src/xml/initChunk.xml'));
@@ -102,18 +113,28 @@ class WorksheetWriter extends Transform {
 
 					if (isBool(val)) {
 						return {
-							_attributes: { r, t: CELL_TYPES.BOOL },
+							_attributes: { r, t: CELL_TYPES.BOOL, s: CELL_STYLES.DEFAULT },
 							v: { _text: [true, 'true'].includes(val) ? 1 : 0 }
 						};
 					}
-					if (typeof val === 'number') {
+					if (c.variant === CELL_VARIANTS.CURRENCY) {
 						return {
-							_attributes: { r, t: CELL_TYPES.NUMBER },
+							_attributes: { r, t: CELL_TYPES.NUMBER, s: CELL_STYLES.CURRENCY },
+							v: { _text: val }
+						};
+					}
+					/*
+						CELL_VARIANTS.NUMBER is used to distinguish between strings and numbers
+						so that excel math functions can be applied to such columns
+					*/
+					if (typeof val === 'number' || c.variant === CELL_VARIANTS.NUMBER) {
+						return {
+							_attributes: { r, t: CELL_TYPES.NUMBER, s: CELL_STYLES.DEFAULT },
 							v: { _text: val }
 						};
 					}
 					return {
-						_attributes: { r, t: CELL_TYPES.INLINE_STR },
+						_attributes: { r, t: CELL_TYPES.INLINE_STR, s: CELL_STYLES.DEFAULT },
 						is: {
 							t: {
 								_text: val || ''
@@ -150,6 +171,7 @@ class WorksheetWriter extends Transform {
  * @param {string} config[].key
  * @param {string} config[].label
  * @param {function} config[].formatter
+ * @param {function} config[].variant
  *
  * @param {Object} [options]
  * @param {boolean} options.debugMemUsage

@@ -120,7 +120,7 @@ class WorksheetWriter extends Transform {
 					if (c.variant === CELL_VARIANTS.CURRENCY) {
 						return {
 							_attributes: { r, t: CELL_TYPES.NUMBER, s: CELL_STYLES.CURRENCY },
-							v: { _text: val }
+							v: { _text: val || 0 }
 						};
 					}
 					/*
@@ -130,7 +130,7 @@ class WorksheetWriter extends Transform {
 					if (typeof val === 'number' || c.variant === CELL_VARIANTS.NUMBER) {
 						return {
 							_attributes: { r, t: CELL_TYPES.NUMBER, s: CELL_STYLES.DEFAULT },
-							v: { _text: val }
+							v: { _text: val || 0 }
 						};
 					}
 					return {

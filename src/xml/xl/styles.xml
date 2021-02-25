@@ -2,7 +2,7 @@
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
 	<numFmts count="2">
 		<numFmt numFmtId="10" formatCode="General" />
-		<numFmt numFmtId="111" formatCode="[$₴-C07]\ #,##0.00;[Red][$₴-C07]\ #,##0.00" />
+		<numFmt numFmtId="111" formatCode="&quot;&#8372;  &quot;#,##0.00;[Red]\-&quot;&#8372;  &quot;#,##0.00"/>
 	</numFmts>
    	<fonts count="4">
 		<font>
